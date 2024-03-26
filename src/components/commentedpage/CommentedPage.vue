@@ -42,6 +42,21 @@ const onClickDelete = async (id) => {
   await reloadData()
 }
 
+const onClickLike = async (id) => {
+  const review = reviews.value.find((review) => review.id === id)
+  await fetch(import.meta.env.VITE_BASE_URL + '/reviews/' + id, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...review,
+      likeCount: review.likeCount + 1,
+    }),
+  })
+  await reloadData()
+}
+
 onMounted(async () => {
   await reloadData()
 })
@@ -145,7 +160,7 @@ onMounted(async () => {
         <button
           type="button"
           class="flex gap-2 items-center"
-          @click="review.likeCount += 1"
+          @click="onClickLike(review.id)"
         >
           <div>
             Liked
