@@ -40,7 +40,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-gradient-to-r from-black to-red-900 h-screen">
+  <div class="bg-gradient-to-r from-black to-red-900 min-h-screen">
     <NavBar />
     <!-- Reviewed -->
     <!-- <pre>

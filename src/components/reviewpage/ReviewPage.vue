@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/user'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getMovies } from '@/libs/fetchUtils'
+import NavBar from '../Homepage/NavBar.vue'
 
 const route = useRoute()
 const id = route.params.id
@@ -116,7 +117,7 @@ async function submitReview() {
       }),
     })
     alert('บันทึกสำเร็จ')
-    router.push(`/commented`)
+    router.replace(`/commented`)
     //go to review page
   }
 }
@@ -129,6 +130,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <NavBar v-if="id" />
   <div
     class="bg-grey-500 backdrop-blur-sm w-full h-full fixed top-0 left-0 py-[175px] overflow-x-hidden overflow-y-auto"
     v-show="props.open"
