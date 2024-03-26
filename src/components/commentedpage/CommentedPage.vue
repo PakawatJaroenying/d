@@ -34,6 +34,14 @@ const submitReview = async (review) => {
   await reloadData()
 }
 
+const onClickDelete = async (id) => {
+  if (!confirm('Are you sure you want to delete this review?')) return
+  await fetch(import.meta.env.VITE_BASE_URL + '/reviews/' + id, {
+    method: 'DELETE',
+  })
+  await reloadData()
+}
+
 onMounted(async () => {
   await reloadData()
 })
@@ -95,12 +103,20 @@ onMounted(async () => {
               </svg>
               <p class="mx-2">{{ currnetUser.username }}</p>
             </div>
-            <button
-              class="underline text-red-700"
-              @click="openRewiewModal(review)"
-            >
-              Edit
-            </button>
+            <div class="flex gap-3">
+              <button
+                class="underline text-blue-500"
+                @click="openRewiewModal(review)"
+              >
+                Edit
+              </button>
+              <button
+                class="underline text-red-700"
+                @click="onClickDelete(review.id)"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
         <div class="flex h-[225px]">
