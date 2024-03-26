@@ -229,6 +229,7 @@ onMounted(async () => {
                 await submitReview()
                 $emit('submitReview')
                 $emit('close')
+                
               })
             "
           >
@@ -236,7 +237,14 @@ onMounted(async () => {
           </button>
           <button
             class="flex items-center justify-center gap-[5px] w-[193px] h-[58px] border border-white text-[20px] rounded-[23px] hover:opacity-70 gradient-background bg-red-900"
-            @click="$emit('close')"
+            @click="
+              () => {
+                if (id) {
+                  router.replace(`/`)
+                }
+                $emit('close')
+              }
+            "
           >
             Close
           </button>
