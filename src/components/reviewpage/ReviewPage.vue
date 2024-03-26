@@ -1,8 +1,14 @@
-<script setup lang="ts">
+<script setup>
+import router from '@/router'
 import RedBar from '../commentedpage/RedBar.vue'
 import ratingIcon from './ratingIcon.vue'
 import { useUserStore } from '@/store/user'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getMovies } from '@/libs/fetchUtils'
+
+const route = useRoute()
+const id = route.params.id
 
 const performance_ratio = ref('50')
 const chapter_ratio = ref('50')
@@ -10,6 +16,8 @@ const production_ratio = ref('50')
 const entertainment_ratio = ref('50')
 const worthiness_ratio = ref('50')
 const review = ref('')
+const movies = ref([])
+
 const props = defineProps({
   movieName: {
     type: String,
@@ -60,57 +68,64 @@ watch(
 )
 
 const userStore = useUserStore()
-const currnetUser = userStore.currnetUser
+const currentUserId = userStore.currnetUser.id
 
 async function submitReview() {
-  //ลบ
-  // await fetch(`http://localhost:5000/reviews/${props.reviewId}`, {
-  //   method: 'DELETE',
-  // })
-
-  //เพิ่ม
-  // await fetch('http://localhost:5000/reviews', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     userId: (currnetUser as any).id,
-  //     movieId: props.movieId,
-  //     rating: {
-  //       performance: Number(performance_ratio.value),
-  //       production: Number(production_ratio.value),
-  //       movie_Chapter: Number(chapter_ratio.value),
-  //       entertainment: Number(entertainment_ratio.value),
-  //       worthiness: Number(worthiness_ratio.value),
-  //     },
-  //     comment: review.value,
-  //     id: props.reviewId,
-  //     likeCount: props.likeCount,
-  //   }),
-  // })
   //แก้ไข
-  await fetch(`http://localhost:5000/reviews/${props.reviewId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      userId: (currnetUser as any).id,
-      movieId: props.movieId,
-      rating: {
-        performance: Number(performance_ratio.value),
-        production: Number(production_ratio.value),
-        movie_Chapter: Number(chapter_ratio.value),
-        entertainment: Number(entertainment_ratio.value),
-        worthiness: Number(worthiness_ratio.value),
+  if (!id) {
+    await fetch(`http://localhost:5000/reviews/${props.reviewId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      comment: review.value,
-      id: props.reviewId,
-      likeCount: props.likeCount,
-    }),
-  })
+      body: JSON.stringify({
+        userId: currentUserId,
+        movieId: props.movieId,
+        rating: {
+          performance: Number(performance_ratio.value),
+          production: Number(production_ratio.value),
+          movie_Chapter: Number(chapter_ratio.value),
+          entertainment: Number(entertainment_ratio.value),
+          worthiness: Number(worthiness_ratio.value),
+        },
+        comment: review.value,
+        id: props.reviewId,
+        likeCount: props.likeCount,
+      }),
+    })
+  } else {
+    //เพิ่ม
+    await fetch('http://localhost:5000/reviews', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: currentUserId,
+        movieId: id,
+        rating: {
+          performance: Number(performance_ratio.value),
+          production: Number(production_ratio.value),
+          movie_Chapter: Number(chapter_ratio.value),
+          entertainment: Number(entertainment_ratio.value),
+          worthiness: Number(worthiness_ratio.value),
+        },
+        comment: review.value,
+        id: crypto.randomUUID(),
+        likeCount: 0,
+      }),
+    })
+    alert('บันทึกสำเร็จ')
+    router.push(`/commented`)
+    //go to review page
+  }
 }
+
+onMounted(async () => {
+  const response = await getMovies(import.meta.env.VITE_BASE_URL)
+  console.log('🚀 ~ onMounted ~ response:', response)
+  movies.value = response
+})
 </script>
 
 <template>
@@ -118,6 +133,7 @@ async function submitReview() {
     class="bg-grey-500 backdrop-blur-sm w-full h-full fixed top-0 left-0 py-[175px] overflow-x-hidden overflow-y-auto"
     v-show="props.open"
   >
+    <!-- {{ movies }} -->
     <div class="flex justify-center text-white">
       <div
         class="bg-gradient-to-r from-black to-red-900 h-4/5 w-2/3 rounded-md p-4"
@@ -129,7 +145,15 @@ async function submitReview() {
 
         <div class="flex px-16 w-full gap-12 h-full">
           <div class="flex w-28 my-8">
-            <img :src="props.image" width="200px" />
+            <img
+              :src="
+                props.image
+                  ? props.image
+                  : 'https://image.tmdb.org/t/p/w500/' +
+                    movies.find((movie) => movie.id === id)?.poster_path
+              "
+              width="200px"
+            />
           </div>
 
           <div class="">
